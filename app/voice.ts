@@ -1,3 +1,6 @@
+// To run this code you need to install the following dependencies:
+// npm install @google/genai
+// npm install -D @types/node
 import {
   GoogleGenAI,
   LiveServerMessage,
@@ -202,3 +205,4 @@ async function main() {
 
   session.close();
 }
+main();

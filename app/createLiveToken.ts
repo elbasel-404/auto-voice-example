@@ -14,7 +14,7 @@ import { GoogleGenAI } from "@google/genai";
  * call this action can obtain a token.
  */
 export async function createLiveToken(): Promise<string> {
-  const apiKey = "AQ.Ab8RN6LnVH1olzVDgW1NUMHFA9gG8IuqkzFC3L16_IN4YSRm6g";
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY is not set");
   }
