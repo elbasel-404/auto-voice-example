@@ -121,7 +121,7 @@ export default function LiveAudio() {
   } | null>(null);
 
   // Playback
-  const playCtxRef = useRef<AudioContext | null>(null);
+  const outputAudioRef = useRef<AudioContext | null>(null);
   const nextPlayTimeRef = useRef(0);
   const playingRef = useRef<Set<AudioBufferSourceNode>>(new Set());
 
@@ -148,7 +148,8 @@ export default function LiveAudio() {
   // ---- playback -----------------------------------------------------------
 
   function playChunk(base64: string, mimeType: string) {
-    const playAudioContext = playCtxRef.current;
+    // console.log(base64);
+    const playAudioContext = outputAudioRef.current;
     if (!playAudioContext) return;
 
     const bytes = base64ToBytes(base64);
@@ -176,6 +177,7 @@ export default function LiveAudio() {
       playAudioContext.currentTime + 0.03,
       nextPlayTimeRef.current,
     );
+
     source.start(startAt);
     nextPlayTimeRef.current = startAt + buffer.duration;
 
@@ -198,7 +200,7 @@ export default function LiveAudio() {
   // ---- incoming messages --------------------------------------------------
 
   function handleMessage(message: LiveServerMessage) {
-    console.log(message);
+    // console.log(message);
     // Remember the latest resumption handle so we can reconnect seamlessly.
     const update = message.sessionResumptionUpdate;
     if (update?.resumable && update.newHandle) {
@@ -362,12 +364,12 @@ export default function LiveAudio() {
     // the browser's autoplay policy lets it run.
     const playCtx = new AudioContext({ sampleRate: 24000 });
     void playCtx.resume();
-    playCtxRef.current = playCtx;
+    outputAudioRef.current = playCtx;
     nextPlayTimeRef.current = 0;
 
     try {
-      await startMic();
       await openSession();
+      await startMic();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not go live");
       await stop();
@@ -391,8 +393,8 @@ export default function LiveAudio() {
     }
 
     stopPlayback();
-    const playCtx = playCtxRef.current;
-    playCtxRef.current = null;
+    const playCtx = outputAudioRef.current;
+    outputAudioRef.current = null;
     await playCtx?.close().catch(() => {});
 
     setStatus("idle");
